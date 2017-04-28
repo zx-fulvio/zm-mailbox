@@ -20,7 +20,9 @@
  */
 package com.zimbra.cs.mailbox;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.zimbra.cs.store.Blob;
 import com.zimbra.cs.store.MailboxBlob;
@@ -40,6 +42,27 @@ public class DeliveryContext {
     private MailboxBlob mMailboxBlob;
     private List<Integer> mMailboxIdList;
     private boolean mIsFirst = true;
+    private Map <Integer,Blob> mailBoxBlobMap;
+
+    public void setMailBoxSpecificBlob(int id, Blob blob) {
+        if(mailBoxBlobMap != null) {
+            mailBoxBlobMap.put(id, blob);
+        }
+    }
+
+    public void clearMailBoxSpecificBlob(int id) {
+        if(mailBoxBlobMap != null) {
+            mailBoxBlobMap.remove(id);
+        }
+    }
+
+    public Blob getMailBoxSpecificBlob(int mailBoxId) {
+        if(mailBoxBlobMap != null) {
+            return mailBoxBlobMap.get(mailBoxId);
+        } else {
+            return null;
+        }
+    }
 
     /**
      * Constructor for non-shared case
@@ -59,6 +82,9 @@ public class DeliveryContext {
     	mShared = shared;
         mMailboxBlob = null;
         mMailboxIdList = mboxIdList;
+        if (mShared) {
+            mailBoxBlobMap =  new HashMap<Integer,Blob>();
+        }
     }
 
     public boolean getShared() {

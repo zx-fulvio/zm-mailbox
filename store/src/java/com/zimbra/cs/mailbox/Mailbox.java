@@ -5908,8 +5908,14 @@ public class Mailbox {
             dctxt = new DeliveryContext();
         }
 
+        boolean deleteMailboxSpecificBlob = false;
         StoreManager sm = StoreManager.getInstance();
-        Blob blob = dctxt.getIncomingBlob();
+        Blob blob = dctxt.getMailBoxSpecificBlob(mId);
+        if (blob == null) {
+            blob = dctxt.getIncomingBlob();
+        } else {
+            deleteMailboxSpecificBlob = true;
+        }
         boolean deleteIncoming = false;
 
         if (blob == null) {
@@ -5934,6 +5940,10 @@ public class Mailbox {
             } finally {
                 if (deleteIncoming) {
                     sm.quietDelete(dctxt.getIncomingBlob());
+                }
+                if (deleteMailboxSpecificBlob) {
+                    sm.quietDelete(dctxt.getMailBoxSpecificBlob(mId));
+                    dctxt.clearMailBoxSpecificBlob(mId);
                 }
                 sm.quietDelete(staged);
             }
