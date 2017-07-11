@@ -16,6 +16,7 @@
  */
 
 package com.zimbra.cs.filter;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimePart;
+import javax.mail.util.SharedByteArrayInputStream;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.jsieve.SieveContext;
@@ -97,6 +99,7 @@ public class ZimbraMailAdapter implements MailAdapter, EnvelopeAccessors {
     private boolean allowFilterToMountpoint = true;
     private Map<String, String> variables = new HashMap<String, String>();
     private List<String> matchedValues = new ArrayList<String>();
+    private boolean parsedMessageCloned = false;
 
     public enum VARIABLEFEATURETYPE { UNKNOWN, OFF, AVAILABLE};
     private VARIABLEFEATURETYPE variablesExtAvailable = VARIABLEFEATURETYPE.UNKNOWN;
@@ -829,9 +832,14 @@ public class ZimbraMailAdapter implements MailAdapter, EnvelopeAccessors {
             InputStream in = null;
             Blob blob = null;
             try {
-                ParsedMessage pm = getParsedMessage();
-                pm.updateMimeMessage();
-                in = pm.getRawInputStream();
+                //ParsedMessage pm = getParsedMessage();
+                //pm.updateMimeMessage();
+                //in = pm.getRawInputStream();
+                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                MimeMessage mm = getMimeMessage();
+                mm.writeTo(buffer);
+                byte[] content = buffer.toByteArray();
+                in = new SharedByteArrayInputStream(content);
                 blob = sm.storeIncoming(in);
             } catch (IOException | ServiceException | MessagingException e) {
                 ZimbraLog.filter.error("Unable to update MimeMessage and incomimg blob.", e);
@@ -844,6 +852,15 @@ public class ZimbraMailAdapter implements MailAdapter, EnvelopeAccessors {
                 ctxt.clearMailBoxSpecificBlob(mailbox.getId());
             }
             ctxt.setMailBoxSpecificBlob(mailbox.getId(), blob);
+        }
+    }
+
+    public void cloneParsedMessage() throws MessagingException, ServiceException {
+        if (!parsedMessageCloned && handler instanceof IncomingMessageHandler) {
+            MimeMessage cloneMM = new MimeMessage(getMimeMessage());
+            ParsedMessage pm = handler.getParsedMessage();
+            ParsedMessage clonePM = new ParsedMessage(cloneMM, pm.isAttachmentIndexingEnabled());
+            ((IncomingMessageHandler) handler).setParsedMessage(clonePM);
         }
     }
 

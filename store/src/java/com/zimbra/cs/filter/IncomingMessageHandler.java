@@ -86,6 +86,10 @@ public final class IncomingMessageHandler implements FilterHandler {
         return parsedMessage;
     }
 
+    public void setParsedMessage(ParsedMessage pm) {
+        this.parsedMessage = pm;
+    }
+
     @Override
     public String getDefaultFolderPath() throws ServiceException {
         return mailbox.getFolderById(octxt, defaultFolderId).getPath();

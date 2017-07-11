@@ -36,6 +36,7 @@ import org.apache.jsieve.exception.SieveException;
 import org.apache.jsieve.exception.SyntaxException;
 import org.apache.jsieve.mail.MailAdapter;
 
+import com.zimbra.common.service.ServiceException;
 import com.zimbra.common.util.CharsetUtil;
 import com.zimbra.common.util.ZimbraLog;
 import com.zimbra.cs.filter.FilterUtil;
@@ -69,7 +70,12 @@ public class ReplaceHeader extends AbstractCommand {
             ehe.setValueList(Arrays.asList("*"));
         }
         FilterUtil.headerNameHasSpace(ehe.getKey());
-
+        try {
+            mailAdapter.cloneParsedMessage();
+        } catch (MessagingException | ServiceException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
         MimeMessage mm = mailAdapter.getMimeMessage();
         Enumeration<Header> headers;
         try {
