@@ -5913,8 +5913,10 @@ public class Mailbox {
         Blob blob = dctxt.getMailBoxSpecificBlob(mId);
         if (blob == null) {
             blob = dctxt.getIncomingBlob();
+            ZimbraLog.filter.debug("MailBoxSpecificBlob is null %d", mId);
         } else {
             deleteMailboxSpecificBlob = true;
+            ZimbraLog.filter.debug("got MailBoxSpecificBlob %d", mId);
         }
         boolean deleteIncoming = false;
 

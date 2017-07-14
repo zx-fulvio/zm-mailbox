@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.zimbra.common.util.ZimbraLog;
 import com.zimbra.cs.store.Blob;
 import com.zimbra.cs.store.MailboxBlob;
 
@@ -47,6 +48,9 @@ public class DeliveryContext {
     public void setMailBoxSpecificBlob(int id, Blob blob) {
         if(mailBoxBlobMap != null) {
             mailBoxBlobMap.put(id, blob);
+            ZimbraLog.filter.debug("setMailBoxSpecificBlob for mailbox %d", id);
+        } else {
+            ZimbraLog.filter.debug("tried setMailBoxSpecificBlob for mailbox %d, but mailBoxBlobMap is null", id);
         }
     }
 
